@@ -23,3 +23,12 @@ class UserService:
         # JWT 토큰 생성 시 identity 값을 문자열로 변환
         access_token = create_access_token(identity=user["email"])  
         return access_token
+    
+    @staticmethod
+    def get_user_by_email(email):
+        """
+        🔍 이메일을 통해 사용자 정보 조회
+        :param email: 사용자 이메일
+        :return: 사용자 정보 (없으면 None)
+        """
+        return UserRepository.find_by_email(email)

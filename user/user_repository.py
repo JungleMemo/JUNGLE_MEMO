@@ -8,7 +8,7 @@ from settings import db  # 이제 상위 폴더의 config.py를 불러올 수 �
 
 
 class UserRepository:
-    collection = db["users"]  # 'users' 컬렉션
+    collection = db["users"]  # 'users' 컬렉션6
 
     @staticmethod
     def find_by_email(email):

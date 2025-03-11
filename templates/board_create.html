@@ -5,6 +5,9 @@
 
     <!-- URL & 키워드 입력 폼 -->
     <form action="{{ url_for('board.create_board') }}" method="post">
+        <!-- ✅ CSRF 토큰 추가 -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
         <label for="title">블로그 제목:</label>
         <input type="text" id="title" name="title" value="{{ title }}" readonly><br><br>
 
@@ -15,8 +18,6 @@
         <input type="text" id="keyword" name="keyword" value="{{ keyword }}" required>
 
         <button type="submit" name="check_keyword">확인</button><br><br>
-
-       
 
         <label for="summary">본문 요약:</label>
         <textarea id="summary" name="summary" rows="5" cols="50" readonly>{{ summary }}</textarea><br><br>

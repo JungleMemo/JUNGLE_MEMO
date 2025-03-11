@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}게시판 검색{% endblock %}
+
+{% block content %}
+    <div>
+        <a href="/">메인</a> / <a href="/write">글쓰기</a> / <a href="/search">검색</a>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <div class="search-container">
+        <form id="searchForm" action="{{ url_for('board.search_boards') }}" method="GET">
+            <input type="text" name="keyword" placeholder="키워드로 검색" value="{{ keyword }}">
+            <button type="submit" class="btn">검색</button>
+            <button type="submit" name="sort" value="like" class="btn">좋아요순</button>
+            <button type="submit" name="sort" value="latest" class="btn">최신순</button>
+        </form>
+    </div>
+
+    <div class="post-container">
+        {% for board in boards %}
+            <div class="post">
+                <h3>{{ board.title }}</h3>
+                <p>{{ board.summary }}</p>
+                <small>작성자: {{ board.writer }} | 좋아요: {{ board.like }} | 날짜: {{ board.create }}</small>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        function logout() {
+            window.location.href = "{{ url_for('user.logout') }}";
+        }
+    </script>
+{% endblock %}
