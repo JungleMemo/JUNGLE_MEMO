@@ -1,25 +1,25 @@
-from user_repository import UserRepository
+from user.user_repository import UserRepository
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_jwt_extended import create_access_token
 
 class UserService:
     @staticmethod
     def register_user(username, email, password):
+        """회원가입: 중복 체크 후 저장"""
         if UserRepository.find_by_email(email):
-            raise ValueError("Username or email already exists.")
+            raise ValueError("이미 존재하는 이메일입니다.")
 
         hashed_password = generate_password_hash(password)
-        return UserRepository.create_user(username, email, hashed_password)
+        UserRepository.create_user(username, email, hashed_password)
+        return {"message": "회원가입 성공!"}
 
     @staticmethod
     def login_user(email, password):
+        """로그인: 비밀번호 검증 후 JWT 발급"""
         user = UserRepository.find_by_email(email)
         if not user or not check_password_hash(user["password"], password):
-            return None  # 로그인 실패
-        return user  # 로그인 성공
+            return None
 
-
-if __name__ == "__main__":
-    #user_id = UserService.register_user("test","test@naver.com", "test123")
-    #print(f"✅ 사용자 생성 완료! ID: {user_id}")
-    user = UserService.login_user("test@naver.com", "test123")
-    print("로그인 성공 %d", user)
+        # JWT 토큰 생성 시 identity 값을 문자열로 변환
+        access_token = create_access_token(identity=user["email"])  
+        return access_token

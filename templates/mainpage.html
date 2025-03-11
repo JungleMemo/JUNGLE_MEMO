@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block title %}메인 페이지{% endblock %}
+
+{% block content %}
+<h2>환영합니다, {{ username }}님!</h2>
+<p>이곳은 로그인된 사용자만 접근할 수 있는 메인 페이지입니다.</p>
+<a href="{{ url_for('user.logout') }}">로그아웃</a>
+{% endblock %}

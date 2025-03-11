@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block title %}대시보드{% endblock %}
+
+{% block content %}
+<h2>환영합니다, {{ username }}님!</h2>
+<p>이곳은 보호된 페이지입니다.</p>
+<a href="{{ url_for('user.logout') }}">로그아웃</a>
+{% endblock %}
