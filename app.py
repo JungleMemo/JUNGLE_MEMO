@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from user.user_controller import user_bp
+from board.board_controller import board_blueprint
 from settings import Config
 
 app = Flask(__name__)

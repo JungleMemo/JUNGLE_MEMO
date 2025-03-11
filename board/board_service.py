@@ -1,9 +1,17 @@
 from board_repository import UserRepository  # 레포지토리 import
 from datetime import datetime
 
+#yj
+import requests
+from bs4 import BeautifulSoup
+import nltk
+from urllib.parse import urlparse
+
+nltk.download("punkt")
+
 class UserService:
     @staticmethod
-    def create_board(url, writer, title, keyword, summary, like=0):
+    def create_board(url, writer, keyword, like=0):
         """
         글 작성 서비스
         :param url: 게시글 URL
@@ -14,6 +22,8 @@ class UserService:
         :param like: 좋아요 수 (기본값 0)
         :return: 생성된 게시글 ID
         """
+        title = UserService.extract_title(url)
+        summary = UserService.extract_summary(url, keyword)
         create_time = datetime  # 현재 UTC 시간 기록
         return UserRepository.create_board(url, writer, title, keyword, summary, like, create_time)
 
