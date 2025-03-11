@@ -1,1 +1,3 @@
 .venv/
+user/__pycache__/
+board/__pycache__/
