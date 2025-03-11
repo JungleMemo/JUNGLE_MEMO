@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 
 nltk.download("punkt")
 
-class UserService:
+class BoardService:
     @staticmethod
     def create_board(url, writer, keyword, like=0):
         """
@@ -22,8 +22,8 @@ class UserService:
         :param like: 좋아요 수 (기본값 0)
         :return: 생성된 게시글 ID
         """
-        title = UserService.extract_title(url)
-        summary = UserService.extract_summary(url, keyword)
+        title = BoardService.extract_title(url)
+        summary = BoardService.extract_summary(url, keyword)
         create_time = datetime  # 현재 UTC 시간 기록
         return UserRepository.create_board(url, writer, title, keyword, summary, like, create_time)
 
@@ -55,12 +55,12 @@ class UserService:
     @staticmethod
     def extract_summary(url, keyword):
         # 🔑 키워드 입력 후 문장 추출
-        text = UserService.extract_content_text(url)
+        text = BoardService.extract_content_text(url)
         my_keyword = keyword.strip().lower()
         sentences = nltk.sent_tokenize(text)
         # filtered_sentences = [s for s in sentences if keyword in s.lower()][:3]
         filtered_sentences = [s.strip() for s in sentences if my_keyword in s.lower()]
-        filtered_sentences = [s for s in filtered_sentences if s]  # ✅ 공백만 있는 문장 제거
+        filtered_sentences = [s for s in filtered_sentences if s]  # 
 
         print(f"\n웹페이지 본문 (요약된 내용):")
         if filtered_sentences:
@@ -75,7 +75,3 @@ class UserService:
         soup = BeautifulSoup(response.text, "html.parser") 
         title = soup.title.string.strip() if soup.title else "제목 없음"
         return title
-
-
-
-    
