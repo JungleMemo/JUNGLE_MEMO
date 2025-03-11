@@ -61,5 +61,5 @@ def mainpage():
 def logout():
     """로그아웃 (JWT 쿠키 삭제)"""
     response = make_response(redirect(url_for("user.login")))
-    unset_jwt_cookies(response)  # ✅ JWT 토큰 삭제
+    unset_jwt_cookies(response)  #  JWT 토큰 삭제
     return response
