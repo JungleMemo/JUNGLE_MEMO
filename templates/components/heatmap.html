@@ -1,0 +1,11 @@
+<div class="heatmap-container">
+    <h2 class="text-center mt-4">학습 히트맵</h2>
+
+    <div class="calendar-container">
+        {% for date, completed in heatmap_data.items() %}
+            <div class="day-box {% if completed %} completed {% endif %}">
+                {{ date.split('-')[2] }}  {# 날짜 표시 (1~31) #}
+            </div>
+        {% endfor %}
+    </div>
+</div>

@@ -1,0 +1,22 @@
+{% extends "base_mypage.html" %}
+
+{% block content %}
+
+<div class="mypage-layout">
+    <div class="left-column">
+        {% include "components/profile.html" %}
+    </div>
+
+    <div class="right-column">
+        {# {% include "components/heatmap.html" %} #}
+
+        <div class="post-list">
+            <h3>작성한 글 목록</h3>
+            {% for post in posts %}
+                {% include "components/post_card.html" %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

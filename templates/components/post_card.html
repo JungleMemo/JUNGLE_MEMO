@@ -1,0 +1,9 @@
+<div class="post-card">
+    <p><strong>제목:</strong> {{ post.title }}</p>
+    <p><strong>요약:</strong> {{ post.summary }}</p>
+    <div class="post-actions">
+        <span>좋아요 {{user.likes}}</span> | 
+        <a href="" class="delete-button">삭제</a> 
+        <!-- url_for delete 필요 -->
+    </div>
+</div>

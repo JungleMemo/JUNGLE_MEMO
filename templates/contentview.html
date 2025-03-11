@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}작성한 글 보기{% endblock %}
+
+{% block content %}
+<div class="content-wrap">
+    <div class="board-content">
+        <h2>제목 : {{ board.title }}</h2>
+        <p>요약 : {{ board.summary }}</p>
+    </div>
+    <p id="like-container">
+        <button class="content-likes" onclick="increaseLike({{ board.id }})">
+            좋아요 : <span id="like-count">{{ board.likes }}</span>
+        </button>
+    </p>
+    <div class="user-comment">
+        <h3>댓글</h3>
+        <ul>
+            {% for comment in comments %}
+                <li>
+                    <strong>{{ comment.username }}</strong>
+                    <p>{{ comment.content }}</p>
+                </li>
+            {% else %}
+                <p>아직 댓글이 없습니다</p>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<script>
+    function increaseLike(boardId) {
+        fetch(`/like/${boardId}`, {  // Flask 서버에 요청 보내기
+            method: "POST"
+        })
+        .then(response => response.json())  // JSON 응답 받기
+        .then(data => {
+            if (data.success) {
+                document.getElementById("like-count").innerText = data.likes;  // HTML 업데이트
+            } else {
+                alert("좋아요를 업데이트하는 데 실패했습니다.");
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    }
+</script>
+{% endblock %}
