@@ -48,7 +48,7 @@ class UserService:
             return ""
         
         soup = BeautifulSoup(response.text, "html.parser")
-        text = soup.get_text(seperator=" ", strip=True)
+        text = soup.get_text(separator=" ", strip=True)
         text = " ".join(text.split())
         return text.strip()
     
