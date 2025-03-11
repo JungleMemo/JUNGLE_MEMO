@@ -2,31 +2,39 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Flask Auth{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>네비게이션 바</title>
+    <!-- Bootstrap CDN 추가 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <nav>
-        <a href="{{ url_for('user.login') }}">로그인</a> |
-        <a href="{{ url_for('user.register') }}">회원가입</a> |
-        {% if session.get('user') %}
-            <a href="{{ url_for('user.dashboard') }}">대시보드</a> |
-            <a href="{{ url_for('user.logout') }}">로그아웃</a>
-        {% endif %}
+
+    <!-- 네비게이션 바 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            
+                        <!-- 네비게이션 링크 (항상 표시됨) -->
+            <div class="d-flex flex-grow-1 justify-content-center">
+                <ul class="navbar-nav d-flex flex-row gap-3">
+                    <li class="nav-item"><a class="nav-link" href="#">마이페이지</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">글쓰기</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">검색</a></li>
+                </ul>
+            </div>
+
+            <!-- 로그아웃 버튼 (우측 정렬) -->
+            <div class="d-flex">
+                <span id="username" class="navbar-text me-3 text-white"></span>
+                <button class="btn btn-outline-light" id="logoutBtn" onclick="logout()">로그아웃</button>
+            </div>
+        </div>
     </nav>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul>
-                {% for category, message in messages %}
-                    <li class="{{ category }}">{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-
-    <div class="content">
+    <div class="container mt-4">
         {% block content %}{% endblock %}
     </div>
-</body>
+
+    <!-- Bootstrap JS 추가 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </html>
