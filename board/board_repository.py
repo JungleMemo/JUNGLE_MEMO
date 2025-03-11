@@ -1,11 +1,10 @@
 import sys
-import os
+import os 
 
 # 현재 파일의 상위 디렉토리를 Python 모듈 검색 경로에 추가
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from settings import db  # 이제 상위 폴더의 config.py를 불러올 수 있음
-
 
 class UserRepository:
     collection = db["boards"]  # 'users' 컬렉션
