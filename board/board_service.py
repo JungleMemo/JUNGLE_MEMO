@@ -1,77 +1,89 @@
-from board_repository import UserRepository  # 레포지토리 import
-from datetime import datetime
-
-#yj
 import requests
 from bs4 import BeautifulSoup
-import nltk
+from datetime import datetime
+from board_repository import BoardRepository
 from urllib.parse import urlparse
-
-nltk.download("punkt")
 
 class BoardService:
     @staticmethod
     def create_board(url, writer, keyword, like=0):
         """
-        글 작성 서비스
+        🔹 글 작성 서비스 (웹페이지에서 정보 추출하여 DB에 저장)
         :param url: 게시글 URL
         :param writer: 작성자
-        :param title: 제목
         :param keyword: 키워드
-        :param summary: 요약
         :param like: 좋아요 수 (기본값 0)
         :return: 생성된 게시글 ID
         """
         title = BoardService.extract_title(url)
         summary = BoardService.extract_summary(url, keyword)
-        create_time = datetime  # 현재 UTC 시간 기록
-        return UserRepository.create_board(url, writer, title, keyword, summary, like, create_time)
+        create_time = datetime.now()  # ✅ 현재 UTC 시간 기록
 
-    @staticmethod
-    def find_by_writer(writer):
-        """
-        작성자의 글 검색
-        :param writer: 검색할 작성자
-        :return: 해당 작성자의 게시글 (없으면 None)
-        """
-        return UserRepository.find_by_writer(writer)
+        print(f"📌 Creating board with data: {url}, {writer}, {title}, {keyword}, {summary}, {like}, {create_time}")
 
+        return BoardRepository.create_board(url, writer, title, keyword, summary, like, create_time)
 
-#yj
     @staticmethod
     def extract_content_text(url):
+        """
+        🔹 웹페이지의 모든 텍스트 추출 (HTML 제거)
+        :param url: 웹페이지 URL
+        :return: 정제된 텍스트
+        """
         headers = {"User-Agent": "Mozilla/5.0"}
         response = requests.get(url, headers=headers, timeout=5)
         
         if response.status_code != 200:
-            print (f"Failed to fetch {url}. Status code: {response.status_code}")
+            print(f"❌ Failed to fetch {url}. Status code: {response.status_code}")
             return ""
         
         soup = BeautifulSoup(response.text, "html.parser")
         text = soup.get_text(separator=" ", strip=True)
-        text = " ".join(text.split())
-        return text.strip()
+        return " ".join(text.split()).strip()  # ✅ 공백 정리 후 반환
     
     @staticmethod
-    def extract_summary(url, keyword):
-        # 🔑 키워드 입력 후 문장 추출
+    def extract_summary(url, keyword, max_length=200):
+        """
+        🔹 웹페이지 본문에서 특정 키워드를 포함하는 텍스트를 가져온 후, 
+           글자 개수 기준으로 요약하는 함수
+        :param url: 웹페이지 URL
+        :param keyword: 키워드
+        :param max_length: 요약할 최대 글자 수 (기본값: 200)
+        :return: 요약된 텍스트
+        """
         text = BoardService.extract_content_text(url)
         my_keyword = keyword.strip().lower()
-        sentences = nltk.sent_tokenize(text)
-        # filtered_sentences = [s for s in sentences if keyword in s.lower()][:3]
-        filtered_sentences = [s.strip() for s in sentences if my_keyword in s.lower()]
-        filtered_sentences = [s for s in filtered_sentences if s]  # 
 
-        print(f"\n웹페이지 본문 (요약된 내용):")
-        if filtered_sentences:
-            for i, sentence in enumerate(filtered_sentences[:3], 1):
-                print(f"{i}. {sentence}")
-        else:
-            print("해당 키워드가 포함된 문장을 찾을 수 없습니다.")
+        # 🔹 키워드를 포함하는 글자 찾기 (대소문자 무시)
+        keyword_index = text.lower().find(my_keyword)
+
+        if keyword_index == -1:
+            print("❌ 해당 키워드가 본문에 없음")
+            return text[:max_length]  # 🔹 키워드가 없으면 앞부분 max_length만큼 반환
+
+        # 🔹 키워드를 중심으로 max_length 길이만큼 자르기
+        start_index = max(0, keyword_index - max_length // 2)
+        end_index = min(len(text), start_index + max_length)
+
+        summary = text[start_index:end_index]
+
+        print(f"\n📌 요약된 본문:\n{summary}...")
+        return summary
 
     @staticmethod
     def extract_title(url):
+        """
+        🔹 웹페이지의 제목(title) 태그 추출
+        :param url: 웹페이지 URL
+        :return: 제목 문자열
+        """
         response = requests.get(url) 
         soup = BeautifulSoup(response.text, "html.parser") 
         title = soup.title.string.strip() if soup.title else "제목 없음"
         return title
+    
+
+if __name__ == "__main__":
+    print(BoardService.create_board(
+        "https://puleugo.tistory.com/107", "sk", "git"
+    ))
