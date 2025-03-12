@@ -39,7 +39,7 @@ def ensure_jwt_exist():
 def get_boards():
     """ 게시글 전체 목록 조회 API (페이징 없이) """
     boards = board_service.get_board_list()
-    return render_template("board_list.html", boards=boards)
+    return redirect(url_for("board.search_boards"))
 
 @board_blueprint.route("/board/<post_id>", methods=["GET"])
 @jwt_required(optional=True)  # ✅ 로그인하지 않아도 접근 가능
