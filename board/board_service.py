@@ -4,6 +4,7 @@ import os
 # 현재 파일의 상위 디렉토리를 Python 모듈 검색 경로에 추가
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import re
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta, date
@@ -66,50 +67,51 @@ class BoardService:
     @staticmethod
     def extract_content_text(url):
         """
-        🔹 웹페이지의 모든 텍스트 추출 (HTML 제거)
+        🔹 티스토리 블로그 본문(article 태그)만 추출
         :param url: 웹페이지 URL
-        :return: 정제된 텍스트
+        :return: 본문 텍스트
         """
         headers = {"User-Agent": "Mozilla/5.0"}
         response = requests.get(url, headers=headers, timeout=5)
-        
+
         if response.status_code != 200:
             print(f"❌ Failed to fetch {url}. Status code: {response.status_code}")
             return ""
-        
+
         soup = BeautifulSoup(response.text, "html.parser")
-        text = soup.get_text(separator=" ", strip=True)
+
+        # ✅ <article> 태그가 있으면 본문 추출
+        article = soup.find("article")
+        if article:
+            text = article.get_text(separator=" ", strip=True)
+        else:
+            # 🔹 <article> 태그가 없으면 본문 대체 (티스토리의 일반적인 클래스 사용)
+            content_div = soup.find("div", class_=re.compile("article|content|entry|post"))
+            text = content_div.get_text(separator=" ", strip=True) if content_div else ""
+
         return " ".join(text.split()).strip()  # ✅ 공백 정리 후 반환
     
     @staticmethod
     def extract_summary(url, keyword, max_length=200):
         """
-        🔹 웹페이지 본문에서 특정 키워드를 포함하는 텍스트를 가져온 후, 
-           글자 개수 기준으로 요약하는 함수
-        :param url: 웹페이지 URL
-        :param keyword: 키워드
-        :param max_length: 요약할 최대 글자 수 (기본값: 200)
-        :return: 요약된 텍스트
+        🔹 본문에서 키워드 중심으로 요약.
         """
         text = BoardService.extract_content_text(url)
-        my_keyword = keyword.strip().lower()
 
-        # 🔹 키워드를 포함하는 글자 찾기 (대소문자 무시)
-        keyword_index = text.lower().find(my_keyword)
+        # ✅ 문장 분할
+        sentences = re.split(r'(?<=[.!?])\s+', text)
 
-        if keyword_index == -1:
-            print("❌ 해당 키워드가 본문에 없음")
-            return text[:max_length]  # 🔹 키워드가 없으면 앞부분 max_length만큼 반환
+        # ✅ 키워드 포함된 문장 선택
+        keyword_sentences = [s for s in sentences if keyword.lower() in s.lower()]
 
-        # 🔹 키워드를 중심으로 max_length 길이만큼 자르기
-        start_index = max(0, keyword_index - max_length // 2)
-        end_index = min(len(text), start_index + max_length)
+        # ✅ 키워드 포함된 첫 2~3 문장 요약
+        if keyword_sentences:
+            summary = " ".join(keyword_sentences[:3])
+        else:
+            summary = " ".join(sentences[:3])  # 키워드 없으면 첫 3문장 요약
 
-        summary = text[start_index:end_index]
-
-        print(f"\n📌 요약된 본문:\n{summary}...")
-        return summary
-
+        return summary[:max_length]  # 최대 글자 제한
+    
     @staticmethod
     def extract_title(url):
         """ 🔹 웹페이지 제목(title) 태그 추출 """
@@ -145,13 +147,13 @@ class BoardService:
         return BoardRepository.delete_by_id(post_id)  # ✅ 삭제 실행
     
     @staticmethod
-    def get_total_likes(writer_email):
+    def get_total_likes(email):
         """
         🔹 특정 사용자의 총 좋아요 수 반환
         :param writer: 사용자 이름
         :return: 총 좋아요 수 (int)
         """
-        return BoardRepository.get_total_likes(writer_email)
+        return BoardRepository.get_total_likes(email)
     
 
     @staticmethod
