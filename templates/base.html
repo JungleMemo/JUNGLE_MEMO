@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        checkJWT();
+    
+        function checkJWT() {
+            fetch("/refresh_token", {
+                method: "POST",
+                credentials: "include"
+            })
+            .then(response => {
+                if (response.status === 401) {
+                    window.location.href = "/login";  // ❌ JWT 없으면 로그인 페이지로 이동
+                }
+            })
+            .catch(error => console.error("JWT 검증 실패:", error));
+        }
+    });
+    </script>
+    
+
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>네비게이션 바</title>
+    <!-- Bootstrap CDN 추가 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+    <!-- 네비게이션 바 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            
+                        <!-- 네비게이션 링크 (항상 표시됨) -->
+            <div class="d-flex flex-grow-1 justify-content-center">
+                <ul class="navbar-nav d-flex flex-row gap-3">
+                    <li class="nav-item"><a class="nav-link" href="{{url_for('board.mypage')}}">마이페이지</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{url_for('board.create_board')}}">글쓰기</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{url_for('board.search_boards')}}">검색</a></li>
+                </ul>
+            </div>
+
+            <!-- 로그아웃 버튼 (우측 정렬) -->
+            <div class="d-flex">
+                <span id="username" class="navbar-text me-3 text-white"></span>
+                <form action="{{ url_for('user.logout') }}" method="get" style="display: inline;">
+                    <button type="submit" class="btn btn-outline-light">로그아웃</button>
+                </form>            
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Bootstrap JS 추가 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</html>

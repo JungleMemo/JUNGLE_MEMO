@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm p-4">
+        <h1>게시글 작성</h1>
+
+        <!-- URL & 키워드 입력 폼 -->
+        <form action="{{ url_for('board.create_board') }}" method="post">
+            <!-- ✅ CSRF 토큰 추가 -->
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            
+            <div class="mb-3">
+                <label for="title" class="form-label">블로그 제목:</label>
+                <input type="text" id="title" name="title" value="{{ title }}" class="form-control" readonly ><br><br>
+            </div>
+
+            <div class="mb-3">
+                <label for="url" class="form-label">블로그 URL:</label>
+                <input type="text" id="url" name="url" value="{{ url }}" class="form-control" required><br><br>
+            </div>
+
+            <div class="mb-3">
+                <label for="keyword" class="form-label">키워드:</label>
+                <input type="text" id="keyword" name="keyword" value="{{ keyword }}" class="form-control" required>
+            </div>
+
+            <button type="submit" name="check_keyword" class="btn btn-secondary mb-3">확인</button><br><br>
+            
+            <div class="mb-3">
+                <label for="summary" class="form-label">본문 요약:</label>
+                <textarea id="summary" name="summary" rows="5" cols="50" class="form-control" readonly>{{ summary }}</textarea><br><br>
+            </div>
+
+            {% if keyword_valid is not none %}
+                <div class="alert {% if keyword_valid %}alert-success{% else %}alert-danger{% endif %}" role="alert">
+                    {% if keyword_valid %}
+                        <p style="color: green;">✔ 키워드가 본문에 포함되었습니다.</p>
+                    {% else %}
+                        <p style="color: red;">❌ 키워드가 본문에 포함되지 않았습니다.</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" name="submit_board" class="btn btn-primary flex-grow-1">게시글 등록</button>
+                <a href="{{ url_for('board.get_boards') }}" class="btn btn-outline-secondary flex-grow-1">게시글 목록으로</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
