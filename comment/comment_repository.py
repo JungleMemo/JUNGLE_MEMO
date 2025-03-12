@@ -18,10 +18,15 @@ class CommentRepository:
         return list(CommentRepository.collection.find({"board_id": ObjectId(board_id)}).sort("create", DESCENDING))
 
     @staticmethod
-    def create_comment(writer, content, create, board_id):
+    def find_by_id(comment_id):
+        return CommentRepository.collection.find_one({"_id": ObjectId(comment_id)})
+
+    @staticmethod
+    def create_comment(writer_name, writer_email, content, create, board_id):
         """✏️ 새로운 댓글 작성"""
         new_comment = {
-            "writer": writer,
+            "writer_name": writer_name,
+            "writer_email":writer_email,
             "content": content,
             "create": create,
             "board_id": ObjectId(board_id)  # ✅ ObjectId 변환 추가

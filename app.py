@@ -22,6 +22,7 @@ app.config["JWT_ACCESS_CSRF_HEADER_NAME"] = "X-CSRF-TOKEN"
 app.config["JWT_ACCESS_COOKIE_PATH"] = "/"
 app.config["JWT_COOKIE_SECURE"] = False  # 개발환경에서는 False로 설정
 app.config["JWT_SESSION_COOKIE"] = True
+app.config['JWT_TOKEN_LOCATION'] = ['cookies']  # 꼭 cookies가 포함되어 있어야 합니다!
 
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=365 * 100)  # 100년 후 만료 (최대한 길게)
 app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=365 * 100)  # 100년 후 만료 (최대한 길게)
