@@ -1,17 +1,18 @@
 .calendar-container {
     display: grid;
-    grid-template-columns: repeat(7, 40px);
+    grid-template-rows: repeat(7, 30px);
+    grid-auto-flow: column;
     gap: 5px;
     justify-content: center;
     margin-top: 20px;
 }
 .day-box {
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
     text-align: center;
-    line-height: 40px;
-    font-size: 12px;
-    border-radius: 5px;
+    line-height: 30px;
+    font-size: 9px;
+    border-radius: 2px;
     background-color: #ddd;
 }
 .completed {
