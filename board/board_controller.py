@@ -98,11 +98,19 @@ def mypage():
     writer = user["username"]
     total_likes = BoardService.get_total_likes(writer)
     posts = BoardService.get_boards_by_writer(writer)
-
-    # ✅ 히트맵 데이터 (기간 2025년 3월 10일 ~ 7월 31일로 조정)
+    
+    # ✅ 히트맵 데이터 추가
     heatmap_data = BoardService.get_heatmap_data(writer)
 
-    return render_template("mypage.html", posts=posts, writer=writer, user=user, heatmap_data=heatmap_data, total_likes=total_likes)
+    return render_template(
+        "mypage.html", 
+        posts=posts, 
+        writer=writer, 
+        user=user, 
+        heatmap_data=heatmap_data, 
+        total_likes=total_likes
+    )
+
 
 @board_blueprint.route("/delete/<post_id>", methods=["POST"])
 @jwt_required(locations=["cookies"])  # ✅ JWT 인증 필요

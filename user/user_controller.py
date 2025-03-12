@@ -1,9 +1,31 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, make_response
+from flask import Blueprint, render_template, request, redirect, url_for, flash, make_response, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity, unset_jwt_cookies, set_access_cookies
 from user.user_service import UserService
 from user.user_repository import UserRepository
 
+import base64
+
 user_bp = Blueprint("user", __name__)
+
+@user_bp.route("/update_profile_photo", methods=["POST"])
+@jwt_required(locations=["cookies"])
+def update_profile_photo():
+    """ 프로필 사진 변경 """
+    email = get_jwt_identity()
+    user = UserService.get_user_by_email(email)
+
+    if not user:
+        return jsonify({"success": False, "message": "사용자를 찾을 수 없습니다."}), 404
+
+    file = request.files.get("profile_photo")
+    if not file:
+        return jsonify({"success": False, "message": "파일을 업로드하세요."}), 400
+
+    # Base64로 변환 후 DB에 저장
+    photo_base64 = base64.b64encode(file.read()).decode("utf-8")
+    UserService.update_profile_photo(email, photo_base64)
+
+    return jsonify({"success": True, "message": "프로필 사진이 업데이트되었습니다."}), 200
 
 @user_bp.route("/register", methods=["GET", "POST"])
 def register():
