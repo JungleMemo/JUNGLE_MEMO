@@ -16,11 +16,11 @@ class CommentService:
         return CommentRepository.find_by_board_id(board_id)
 
     @staticmethod
-    def add_comment(writer, content, board_id):
+    def add_comment(writer_name, writer_email, content, board_id):
         """✏️ 새로운 댓글 추가"""
         create_time = datetime.now()  # ✅ UTC 시간 기준 저장
-        print(f"📌 댓글 저장: 작성자={writer}, 내용={content}, 게시글ID={board_id}")  # ✅ 디버깅용 로그 추가
-        return CommentRepository.create_comment(writer, content, create_time, board_id)
+        print(f"📌 댓글 저장: 작성자={writer_name}, 내용={content}, 게시글ID={board_id}")  # ✅ 디버깅용 로그 추가
+        return CommentRepository.create_comment(writer_name, writer_email, content, create_time, board_id)
 
     @staticmethod
     def delete_comment(comment_id):
@@ -30,6 +30,10 @@ class CommentService:
         :return: 삭제 성공 여부 (True/False)
         """
         return CommentRepository.delete_comment(comment_id)
+
+    @staticmethod
+    def get_comment_by_id(comment_id):
+        return CommentRepository.find_by_id(comment_id)
 
 
 if __name__ == "__main__":

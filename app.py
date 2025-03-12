@@ -22,6 +22,7 @@ app.config["JWT_ACCESS_CSRF_HEADER_NAME"] = "X-CSRF-TOKEN"
 app.config["JWT_ACCESS_COOKIE_PATH"] = "/"
 app.config["JWT_COOKIE_SECURE"] = False  # 개발환경에서는 False로 설정
 app.config["JWT_SESSION_COOKIE"] = True
+app.config['JWT_TOKEN_LOCATION'] = ['cookies']  # 꼭 cookies가 포함되어 있어야 합니다!
 
 
 
@@ -32,4 +33,4 @@ app.register_blueprint(user_bp)
 app.register_blueprint(board_blueprint)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run("0.0.0.0", port = 5001, debug=True)

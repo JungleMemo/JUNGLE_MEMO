@@ -54,9 +54,9 @@ def view_board(post_id):
         return redirect(url_for("board.get_boards"))
 
     comments = CommentService.get_comments_by_board(post_id)
-    current_user = get_jwt_identity()  # ✅ 로그인한 유저만 가져오기 (비로그인 사용자는 None)
 
-    return render_template("contentview.html", board=board, comments=comments, current_user=current_user)
+    current_user_email = get_jwt_identity()  # ✅ 로그인한 유저만 가져오기 (비로그인 사용자는 None)
+    return render_template("contentview.html", board=board, comments=comments, current_user_email=current_user_email)
 
 @board_blueprint.route("/create", methods=["GET", "POST"])
 @jwt_required(locations=["cookies"])  # ✅ JWT 인증 필요
@@ -150,52 +150,46 @@ def delete_post(post_id):
 
     
 @board_blueprint.route("/add_comment/<board_id>", methods=["POST"])
-@jwt_required(locations=["cookies"])  # ✅ JWT 인증 필요
+@jwt_required(locations=["cookies"])
 def add_comment(board_id):
-    """
-    ✏️ 댓글 작성
-    """
-    email = get_jwt_identity()
+    email = get_jwt_identity()  # "qwer@qwer.com"
     user = UserService.get_user_by_email(email)
-
     if not user:
         return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
 
-    try:
-        data = request.get_json()
-        content = data.get("content")
-
-        if not content:
+    data = request.get_json()
+    content = data.get("content")
+    if not content:
             return jsonify({"success": False, "message": "댓글 내용을 입력하세요."}), 400
 
-        print(f"📌 댓글 추가: 작성자={user['username']}, 내용={content}, 게시글ID={board_id}")  # ✅ 디버깅용 로그 추가
+        # 닉네임 + 이메일 둘 다 준비
+    writer_name = user["username"]     
+    writer_email = user["email"]       
 
-        CommentService.add_comment(user["username"], content, board_id)
-        return jsonify({"success": True, "message": "댓글이 등록되었습니다."}), 201
+    # 댓글 db에 저장
+    CommentService.add_comment(writer_name, writer_email, content, board_id)
 
-    except Exception as e:
-        print(f"❌ 오류 발생: {str(e)}")  # ✅ 서버에서 발생한 예외 확인
-        return jsonify({"success": False, "message": "서버 오류 발생"}), 500
-
+    return jsonify({"success": True, "message": "댓글이 등록되었습니다."}), 201
 
 @board_blueprint.route("/delete_comment/<comment_id>", methods=["DELETE"])
 @jwt_required(locations=["cookies"])
 def delete_comment(comment_id):
-    """
-    ❌ 댓글 삭제
-    """
-    email = get_jwt_identity()
+    email = get_jwt_identity()  # "qwer@qwer.com"
     user = UserService.get_user_by_email(email)
-
     if not user:
         return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
 
-    success = CommentService.delete_comment(comment_id)
-    if success:
-        return jsonify({"success": True, "message": "댓글이 삭제되었습니다."}), 200
-    else:
-        return jsonify({"success": False, "message": "삭제할 댓글이 없습니다."}), 403
-    
+    comment = CommentService.get_comment_by_id(comment_id)
+    if not comment:
+        return jsonify({"success": False, "message": "삭제할 댓글이 없습니다."}), 404
+
+    # writer_email로 본인 여부 확인
+    if comment["writer_email"] != user["email"]:
+        return jsonify({"success": False, "message": "자신의 댓글만 삭제할 수 있습니다."}), 403
+
+    CommentService.delete_comment(comment_id)
+    return jsonify({"success": True, "message": "댓글이 삭제되었습니다."}), 200
+
 @board_blueprint.route("/search", methods=["GET"])
 def search_boards():
     """
