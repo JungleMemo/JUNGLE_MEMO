@@ -5,7 +5,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
-from flask_wtf.csrf import generate_csrf  # ✅ CSRF 토큰 생성 함수 추가
+from flask_wtf.csrf import generate_csrf # ✅ CSRF 토큰 생성 함수 추가
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from board.board_service import BoardService
 from user.user_service import UserService

@@ -15,8 +15,8 @@ from settings import Config
 app = Flask(__name__)
 app.config["SECRET_KEY"] = Config.SECRET_KEY  # 세션 키
 app.config["JWT_SECRET_KEY"] = Config.JWT_SECRET_KEY  # JWT 시크릿 키
-app.config["WTF_CSRF_ENABLED"] = True  # ✅ CSRF 보호 활성화
-app.config["SESSION_PERMANENT"] = False  # ✅ CSRF 토큰이 세션에서 사라지지 않도록 설정
+app.config["JWT_COOKIE_CSRF_PROTECT"] = False  # ✅ JWT 기반 CSRF 보호 비활성화
+
 
 jwt = JWTManager(app)
 
