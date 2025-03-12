@@ -1,14 +1,12 @@
 import sys
 import os
-
-# 현재 파일의 상위 디렉토리를 Python 모듈 검색 경로에 추가
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from settings import db  # 이제 상위 폴더의 config.py를 불러올 수 있음
-
+from settings import db  # MongoDB 설정 가져오기
+from bson import ObjectId
 
 class UserRepository:
-    collection = db["users"]  # 'users' 컬렉션6
+    collection = db["users"]  # 'users' 컬렉션
 
     @staticmethod
     def find_by_email(email):
@@ -18,13 +16,20 @@ class UserRepository:
     @staticmethod
     def create_user(username, email, hashed_password):
         """사용자 생성"""
+        default_profile_photo = "/static/images/default_profile.png"  # 기본 이미지 경로
         new_user = {
             "username": username,
             "email": email,
-            "password": hashed_password
+            "password": hashed_password,
+            "profile_photo": default_profile_photo  # 기본 프로필 사진 저장
         }
         result = UserRepository.collection.insert_one(new_user)
         return result.inserted_id
 
-
-
+    @staticmethod
+    def update_profile_photo(email, photo_base64):
+        """프로필 사진 업데이트"""
+        return UserRepository.collection.update_one(
+            {"email": email},
+            {"$set": {"profile_photo": photo_base64}}
+        )
