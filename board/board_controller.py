@@ -64,17 +64,20 @@ def create_board():
         url = request.form["url"]
         keyword = request.form["keyword"]
 
+        #제목 가져오기
+        title = BoardService.extract_title(url)
+
         # ✅ 키워드 포함 여부 확인
         summary = BoardService.extract_summary(url, keyword)
         keyword_valid = keyword.lower() in summary.lower()
 
         if "check_keyword" in request.form:
-            return render_template("board_create.html", url=url, keyword=keyword, summary=summary, keyword_valid=keyword_valid, csrf_token=csrf_token)
+            return render_template("board_create.html", url=url, title = title,keyword=keyword, summary=summary, keyword_valid=keyword_valid, csrf_token=csrf_token)
 
         elif "submit_board" in request.form:
             if not keyword_valid:
                 flash("❌ 키워드가 본문에 포함되지 않았습니다. 다른 키워드를 사용해주세요.", "danger")
-                return render_template("board_create.html", url=url, keyword=keyword, summary=summary, keyword_valid=keyword_valid, csrf_token=csrf_token)
+                return render_template("board_create.html", url=url,title = title, keyword=keyword, summary=summary, keyword_valid=keyword_valid, csrf_token=csrf_token)
 
             post_id = BoardService.create_board(url, writer, keyword)
             flash("✅ 게시글이 성공적으로 등록되었습니다!", "success")
@@ -101,7 +104,7 @@ def mypage():
 
     return render_template("mypage.html", posts=posts, writer=writer, user=user, heatmap_data=heatmap_data)
 
-@board_blueprint.route("/delete/<post_id>", methods=["DELETE"])
+@board_blueprint.route("/delete/<post_id>", methods=["POST"])
 @jwt_required(locations=["cookies"])  # ✅ JWT 인증 필요
 def delete_post(post_id):
     """
@@ -116,10 +119,8 @@ def delete_post(post_id):
     writer = user["username"]
     success = BoardService.delete_post(post_id, writer)
 
-    if success:
-        return jsonify({"success": True, "message": "게시글이 삭제되었습니다."}), 200
-    else:
-        return jsonify({"success": False, "message": "삭제 권한이 없거나 존재하지 않는 게시글입니다."}), 403
+    return redirect(url_for("board.mypage"))  # ✅ 삭제 후 게시글 목록으로 리디렉트
+
     
 @board_blueprint.route("/add_comment/<board_id>", methods=["POST"])
 @jwt_required(locations=["cookies"])  # ✅ JWT 인증 필요

@@ -1,12 +1,11 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <title>{% block title %}MyPage{% endblock %}</title>
+{% extends "base.html" %}
+
+{% block title %}MyPage{% endblock %}
+
+{% block content %}
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='heatmap.css') }}">
-</head>
-<body>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <ul>
@@ -18,7 +17,6 @@
     {% endwith %}
 
     <main class="mypage-container">
-        {% block content %}{% endblock %}
+        {% block mypage_content %}{% endblock %}
     </main>
-</body>
-</html>
+{% endblock %}

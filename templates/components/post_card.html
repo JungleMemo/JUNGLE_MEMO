@@ -3,7 +3,9 @@
     <p><strong>요약:</strong> {{ post.summary }}</p>
     <div class="post-actions">
         <span>좋아요 {{ post.likes }}</span> | 
-        <a href="{{ url_for('board.delete_post', post_id=post['_id']) }}" class="delete-button">삭제</a> 
-        <!-- 삭제 기능을 위한 URL 추가 -->
+        <form action ="{{url_for('board.delete_post', post_id=post['_id'])}}" method="post" style="display: inline;">
+            <button type="submit" class="delete-button">삭제</button>
+        </form>
     </div>
 </div>
+
