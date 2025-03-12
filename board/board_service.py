@@ -118,13 +118,13 @@ class BoardService:
         return soup.title.string.strip() if soup.title else "제목 없음"
     
     @staticmethod
-    def get_boards_by_writer(writer):
+    def get_boards_by_writer(writer_email):
         """
         🔍 특정 사용자의 게시글 목록 조회
         :param writer: 작성자 ID 또는 이름
         :return: 최신순 게시글 리스트
         """
-        return BoardRepository.find_by_writer(writer)
+        return BoardRepository.find_by_writer(writer_email)
     
     @staticmethod
     def delete_post(post_id, writer):
@@ -145,13 +145,13 @@ class BoardService:
         return BoardRepository.delete_by_id(post_id)  # ✅ 삭제 실행
     
     @staticmethod
-    def get_total_likes(writer):
+    def get_total_likes(writer_email):
         """
         🔹 특정 사용자의 총 좋아요 수 반환
         :param writer: 사용자 이름
         :return: 총 좋아요 수 (int)
         """
-        return BoardRepository.get_total_likes(writer)
+        return BoardRepository.get_total_likes(writer_email)
     
 
     @staticmethod
@@ -160,7 +160,7 @@ class BoardService:
         return datetime.now(BoardService.KST).date()
 
     #TODO: 크래프톤 정글 시작날짜와 끝@staticmethod
-    def create_board(url, writer, keyword, like=0):
+    def create_board(url, writer_email, keyword, like=0):
         """
         📝 게시글 생성 (웹페이지 정보 추출 후 DB 저장)
         :param url: 게시글 URL
@@ -173,7 +173,7 @@ class BoardService:
         summary = BoardService.extract_summary(url, keyword)
         create_time = datetime.now()  # ✅ 현재 UTC 시간 기록
 
-        return BoardRepository.create_board(url, writer, title, keyword, summary, like, create_time)
+        return BoardRepository.create_board(url, writer_email, title, keyword, summary, like, create_time)
     
     @staticmethod
     def generate_heatmap(start_date, end_date):
@@ -202,13 +202,13 @@ class BoardService:
         return heatmap_data
     
     @staticmethod
-    def get_heatmap_data(writer):
+    def get_heatmap_data(email):
         """
         🔥 특정 사용자의 게시글 작성 데이터를 반영한 히트맵 생성
         :param writer: 작성자 ID 또는 이름
         :return: 날짜별 글 작성 여부 (딕셔너리 형태)
         """
-        posts = BoardRepository.find_by_writer(writer)  # ✅ 사용자의 게시글 가져오기
+        posts = BoardRepository.find_by_writer(email)  # ✅ 사용자의 게시글 가져오기
         db_data = []
 
         for post in posts:
