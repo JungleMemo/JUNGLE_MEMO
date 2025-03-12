@@ -1,11 +1,14 @@
 <div class="heatmap-container">
-    <h2 class="text-center mt-4">학습 히트맵</h2>
+    <div class="card p-3 border-0">
+        <h2 class="text-center mb-3">학습 히트맵</h2>
 
-    <div class="calendar-container">
-        {% for date, completed in heatmap_data.items() %}
-            <div class="day-box {% if completed %} completed {% endif %}">
-                {{ date.split('-')[2] }}  {# 날짜 표시 (1~31) #}
-            </div>
-        {% endfor %}
-    </div>
+        <div class="calendar-container d-flex flex-wrap justify-content-start mt-3">
+            {% for date, completed in heatmap_data.items() %}
+                <!--<div class="day-box {% if completed %} completed {% endif %}">-->
+                <div class="day-box {% if completed %} completed {% endif %}" data-month="{{ date.split('-')[1] }}">
+                    {{ date.split('-')[2] }}  {# 날짜 표시 (1~31) #}
+                </div>
+            {% endfor %}
+        </div>
+    </div>  
 </div>

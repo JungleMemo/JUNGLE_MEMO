@@ -16,6 +16,13 @@
     background-color: #ddd;
 }
 .completed {
-    background-color: #28a745; /* 초록색 */
-    color: white;
+    background-color: #28a745 !important;
+    color: white !important;
 }
+
+.day-box[data-month="03"] { background-color: #ededed; } /* 3월 - 연한 회색 */
+.day-box[data-month="04"] { background-color: #dbdbdb; } /* 4월 - 짙은 회색 */
+.day-box[data-month="05"] { background-color: #ededed; } /* 5월 - 연한 회색 */
+.day-box[data-month="06"] { background-color: #dbdbdb; } /* 6월 - 짙은 회색 */
+.day-box[data-month="07"] { background-color: #ededed; } /* 5월 - 연한 회색 */
+
