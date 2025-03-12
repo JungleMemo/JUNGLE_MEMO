@@ -1,69 +1,32 @@
 {% extends "base_mypage.html" %}
 
 {% block mypage_content %}
-<div class="mypage-layout">
-    <div class="left-column">
-        <div class="profile-container">
-            <div class="profile-photo">
-                {% if user.profile_photo %}
-                    <img id="profile-img" src="data:image/png;base64,{{ user.profile_photo }}" alt="Profile Photo" width="100" height="100">
+<div class="mypage-layout container mt-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card p-3 text-center">
+                {% include "components/profile.html" %}
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="card p-3 mb-4">
+                {% include "components/heatmap.html" %}  {# 🔥 히트맵 추가 #}
+            </div>
+
+            <div class="post-list p-0">
+                <h3 class="mb-3 mt-5">{{ writer }}님의 작성한 글 목록</h3>
+                {% if posts %}
+                    <div class="list-group">
+                        {% for post in posts %}
+                            {% include "components/post_card.html" %}
+                        {% endfor %}
+                    <div>
                 {% else %}
-                    <img id="profile-img" src="/static/images/default_profile.png" alt="Default Profile" width="100" height="100">
+                    <p>작성한 글이 없습니다.</p>
                 {% endif %}
             </div>
-            <div class="profile-info">
-                <p>이름: {{ user.username }}</p>
-                <p>좋아요 : {{ total_likes | default(0) }}</p>
-            </div>
-
-            <!-- 프로필 사진 업로드 -->
-            <input type="file" id="profile_photo" name="profile_photo" accept="image/*">
-        </div>
-    </div>
-
-    <div class="right-column">
-        {% include "components/heatmap.html" %}  {# 🔥 히트맵 추가 #}
-
-        <div class="post-list">
-            <h3>{{ writer }}님의 작성한 글 목록</h3>
-            {% if posts %}
-                {% for post in posts %}
-                    {% include "components/post_card.html" %}
-                {% endfor %}
-            {% else %}
-                <p>작성한 글이 없습니다.</p>
-            {% endif %}
         </div>
     </div>
 </div>
-
-<script>
-document.getElementById("profile_photo").addEventListener("change", function(event) {
-    let formData = new FormData();
-    let fileInput = event.target.files[0];
-    
-    if (!fileInput) {
-        return;
-    }
-
-    formData.append("profile_photo", fileInput);
-
-    fetch("/update_profile_photo", {
-        method: "POST",
-        body: formData,
-        credentials: "include"
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            location.reload();  // 변경된 프로필 반영을 위해 새로고침
-        } else {
-            alert("프로필 사진 업데이트 실패!");
-        }
-    })
-    .catch(error => console.error("Error:", error));
-});
-</script>
-
 {% endblock %}

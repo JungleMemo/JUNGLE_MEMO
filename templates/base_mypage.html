@@ -3,10 +3,9 @@
 {% block title %}MyPage{% endblock %}
 
 {% block content %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='heatmap.css') }}">
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
+    <!--{% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <ul>
                 {% for category, message in messages %}
@@ -14,9 +13,9 @@
                 {% endfor %}
             </ul>
         {% endif %}
-    {% endwith %}
+    {% endwith %}-->
 
-    <main class="mypage-container">
+    <main class="mypage-container container mt-4">
         {% block mypage_content %}{% endblock %}
     </main>
 {% endblock %}
