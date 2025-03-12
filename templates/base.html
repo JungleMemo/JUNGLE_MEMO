@@ -25,7 +25,9 @@
             <!-- 로그아웃 버튼 (우측 정렬) -->
             <div class="d-flex">
                 <span id="username" class="navbar-text me-3 text-white"></span>
-                <button class="btn btn-outline-light" id="logoutBtn" onclick="logout()">로그아웃</button>
+                <form action="{{ url_for('user.logout') }}" method="get" style="display: inline;">
+                    <button type="submit" class="btn btn-outline-light">로그아웃</button>
+                </form>            
             </div>
         </div>
     </nav>
