@@ -34,9 +34,21 @@ def register():
         username = request.form["username"]
         email = request.form["email"]
         password = request.form["password"]
+        confirm_password = request.form["password_confirm"]
+
+        # ✅ 이메일 중복 체크
+        if UserService.get_user_by_email(email):
+            flash("❌ 이미 존재하는 이메일입니다!", "danger")
+            return redirect(url_for("user.register"))
+
+        # ✅ 백엔드에서도 비밀번호 확인
+        if password != confirm_password:
+            flash("❌ 비밀번호가 일치하지 않습니다!", "danger")
+            return redirect(url_for("user.register"))
+
         try:
             UserService.register_user(username, email, password)
-            flash("회원가입 성공! 로그인 해주세요.", "success")
+            flash("✅ 회원가입 성공! 로그인 해주세요.", "success")
             return redirect(url_for("user.login"))
         except ValueError as e:
             flash(str(e), "danger")
@@ -85,3 +97,10 @@ def logout():
     response = make_response(redirect(url_for("user.login")))
     unset_jwt_cookies(response)  #  JWT 토큰 삭제
     return response
+
+@user_bp.route("/check_email", methods=["GET"])
+def check_email():
+    """이메일 중복 확인 API"""
+    email = request.args.get("email")
+    exists = UserService.get_user_by_email(email) is not None
+    return jsonify({"exists": exists})

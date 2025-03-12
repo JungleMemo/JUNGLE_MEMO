@@ -5,14 +5,16 @@ from flask_jwt_extended import create_access_token
 class UserService:
     @staticmethod
     def register_user(username, email, password):
-        """회원가입: 중복 체크 후 저장"""
+        """회원가입: 이메일 중복 체크 후 저장"""
+        
+        # ✅ 이메일 중복 체크
         if UserRepository.find_by_email(email):
             raise ValueError("이미 존재하는 이메일입니다.")
 
         hashed_password = generate_password_hash(password)
         UserRepository.create_user(username, email, hashed_password)
         return {"message": "회원가입 성공!"}
-
+    
     @staticmethod
     def login_user(email, password):
         """로그인: 비밀번호 검증 후 JWT 발급"""
