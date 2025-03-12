@@ -2,7 +2,7 @@
     <div class="profile-photo">Profile Photo</div>
     <div class="profile-info">
         <p>이름: {{ user.username }}</p>
-        <p>좋아요 : {{ user.likes | default(0) }}</p> 
+        <p>좋아요 : {{ total_likes | default(0) }}</p> 
         <!-- 좋아요 총합이 없을 경우 기본값 0으로 표시 -->
     </div>
 </div>

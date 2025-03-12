@@ -96,13 +96,13 @@ def mypage():
         return redirect(url_for("user.login"))  # 🔹 사용자 정보가 없으면 로그인 페이지로 이동
 
     writer = user["username"]
-    likes = BoardService.get_total_likes(writer)  # ✅ 총 좋아요 수 가져오기
+    total_likes = BoardService.get_total_likes(writer)  # ✅ 총 좋아요 수 가져오기
     posts = BoardService.get_boards_by_writer(writer)  # ✅ 해당 사용자가 작성한 게시글 조회
     heatmap_data = BoardService.get_heatmap_data(writer, days=30)  # ✅ 히트맵 데이터 생성
 
     print("🔥 Heatmap Data:", heatmap_data)  # ✅ 디버깅 로그 추가
 
-    return render_template("mypage.html", posts=posts, writer=writer, user=user, heatmap_data=heatmap_data)
+    return render_template("mypage.html", posts=posts, writer=writer, user=user, heatmap_data=heatmap_data, total_likes = total_likes)
 
 @board_blueprint.route("/delete/<post_id>", methods=["POST"])
 @jwt_required(locations=["cookies"])  # ✅ JWT 인증 필요
