@@ -1,4 +1,25 @@
 <!DOCTYPE html>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        checkJWT();
+    
+        function checkJWT() {
+            fetch("/refresh_token", {
+                method: "POST",
+                credentials: "include"
+            })
+            .then(response => {
+                if (response.status === 401) {
+                    window.location.href = "/login";  // ❌ JWT 없으면 로그인 페이지로 이동
+                }
+            })
+            .catch(error => console.error("JWT 검증 실패:", error));
+        }
+    });
+    </script>
+    
+
 <html lang="ko">
 <head>
     <meta charset="UTF-8">

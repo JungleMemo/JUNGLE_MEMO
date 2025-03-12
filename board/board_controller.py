@@ -6,7 +6,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_wtf.csrf import generate_csrf # ✅ CSRF 토큰 생성 함수 추가
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 from board.board_service import BoardService
 from user.user_service import UserService
 from comment.comment_service import CommentService
@@ -15,6 +15,25 @@ from comment.comment_service import CommentService
 board_blueprint = Blueprint("board", __name__)
 # 서비스 객체 생성
 board_service = BoardService()
+
+@board_blueprint.before_request
+def ensure_jwt_exist():
+    exempt_routes = [
+        "user.login", "user.register", "static",
+        "board.get_boards", "board.view_board", "board.search_boards"
+    ]
+
+    if request.endpoint in exempt_routes:
+        return  # 🔹 예외 처리 대상은 인증 체크 안 함
+
+    if "access_token_cookie" not in request.cookies:  # ✅ 쿠키 확인
+        print("⚠️ JWT 쿠키 없음 -> 로그인 페이지로 이동")
+        return redirect(url_for("user.login"))
+
+    try:
+        verify_jwt_in_request()  # ✅ JWT 검증 시도
+    except Exception as e:
+        print(f"⚠️ JWT 검증 실패: {str(e)} -> 그냥 사십쇼")
 
 @board_blueprint.route("/boards", methods=["GET"])
 def get_boards():
