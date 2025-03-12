@@ -87,22 +87,22 @@ def create_board():
 
 
 @board_blueprint.route("/mypage", methods=["GET"])
-@jwt_required(locations=["cookies"])  # ✅ JWT 인증 필요
+@jwt_required(locations=["cookies"])
 def mypage():
-    email = get_jwt_identity()  # ✅ JWT에서 `email` 가져오기
-    user = UserService.get_user_by_email(email)  # ✅ 사용자 조회
+    email = get_jwt_identity()
+    user = UserService.get_user_by_email(email)
 
     if not user:
-        return redirect(url_for("user.login"))  # 🔹 사용자 정보가 없으면 로그인 페이지로 이동
+        return redirect(url_for("user.login"))
 
     writer = user["username"]
-    total_likes = BoardService.get_total_likes(writer)  # ✅ 총 좋아요 수 가져오기
-    posts = BoardService.get_boards_by_writer(writer)  # ✅ 해당 사용자가 작성한 게시글 조회
-    heatmap_data = BoardService.get_heatmap_data(writer, days=30)  # ✅ 히트맵 데이터 생성
+    total_likes = BoardService.get_total_likes(writer)
+    posts = BoardService.get_boards_by_writer(writer)
 
-    print("🔥 Heatmap Data:", heatmap_data)  # ✅ 디버깅 로그 추가
+    # ✅ 히트맵 데이터 (기간 2025년 3월 10일 ~ 7월 31일로 조정)
+    heatmap_data = BoardService.get_heatmap_data(writer)
 
-    return render_template("mypage.html", posts=posts, writer=writer, user=user, heatmap_data=heatmap_data, total_likes = total_likes)
+    return render_template("mypage.html", posts=posts, writer=writer, user=user, heatmap_data=heatmap_data, total_likes=total_likes)
 
 @board_blueprint.route("/delete/<post_id>", methods=["POST"])
 @jwt_required(locations=["cookies"])  # ✅ JWT 인증 필요

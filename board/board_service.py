@@ -176,14 +176,13 @@ class BoardService:
         return BoardRepository.create_board(url, writer, title, keyword, summary, like, create_time)
     
     @staticmethod
-    def generate_heatmap(start_date, days):
+    def generate_heatmap(start_date, end_date):
         """
         🔥 기본 히트맵 데이터 생성 (빈 날짜 포함)
-        :param start_date: 시작 날짜 (오늘)
-        :param days: 며칠 치 데이터를 생성할 것인지
+        :param start_date: 시작 날짜
+        :param end_date: 끝 날짜
         :return: 빈 히트맵 데이터 (날짜별 0)
         """
-        end_date = start_date + timedelta(days=days)
         return {
             (start_date + timedelta(days=i)).strftime("%Y-%m-%d"): 0
             for i in range((end_date - start_date).days + 1)
@@ -201,13 +200,12 @@ class BoardService:
             if date in heatmap_data:
                 heatmap_data[date] = 1  # ✅ 해당 날짜에 글이 있음을 표시
         return heatmap_data
-
+    
     @staticmethod
-    def get_heatmap_data(writer, days=30):
+    def get_heatmap_data(writer):
         """
         🔥 특정 사용자의 게시글 작성 데이터를 반영한 히트맵 생성
         :param writer: 작성자 ID 또는 이름
-        :param days: 최근 며칠 치 데이터를 표시할 것인지
         :return: 날짜별 글 작성 여부 (딕셔너리 형태)
         """
         posts = BoardRepository.find_by_writer(writer)  # ✅ 사용자의 게시글 가져오기
@@ -221,9 +219,13 @@ class BoardService:
                 date_kst = post["create"]  # ✅ 문자열로 저장된 경우 그대로 사용
             db_data.append(date_kst)
 
-        # ✅ 한국(KST) 기준 오늘 날짜로 시작
-        start_date = BoardService.get_kst_today() - timedelta(days=days)
-        heatmap_data = BoardService.generate_heatmap(start_date, days)
+        # ✅ 히트맵 기간 (2025년 3월 10일 ~ 2025년 7월 31일)
+        start_date = date(2025, 3, 10)
+        end_date = date(2025, 7, 31)
+
+        # ✅ 기본 히트맵 데이터 생성
+        heatmap_data = BoardService.generate_heatmap(start_date, end_date)
+
         return BoardService.update_heatmap_data(heatmap_data, db_data)
     
     @staticmethod
