@@ -49,7 +49,7 @@ def login():
     """로그인 라우트"""
     token = request.cookies.get("access_token_cookie")  # ✅ JWT 쿠키가 있는지 확인
     if token:
-        return redirect(url_for("user.mainpage"))
+        return redirect(url_for("board.mypage"))
 
     if request.method == "POST":
         email = request.form["email"]
@@ -57,7 +57,7 @@ def login():
         token = UserService.login_user(email, password)
 
         if token:
-            response = make_response(redirect(url_for("user.mainpage")))
+            response = make_response(redirect(url_for("board.mypage")))
             set_access_cookies(response, token)  # ✅ JWT를 쿠키에 저장
             return response
         else:

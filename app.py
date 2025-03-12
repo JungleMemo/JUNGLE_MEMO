@@ -5,7 +5,7 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from flask_wtf.csrf import CSRFProtect
-from flask import Flask
+from flask import Flask, redirect, url_for
 from flask_jwt_extended import JWTManager
 from user.user_controller import user_bp
 from board.board_controller import board_blueprint
@@ -23,6 +23,13 @@ app.config["JWT_ACCESS_COOKIE_PATH"] = "/"
 app.config["JWT_COOKIE_SECURE"] = False  # 개발환경에서는 False로 설정
 app.config["JWT_SESSION_COOKIE"] = True
 
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=365 * 100)  # 100년 후 만료 (최대한 길게)
+app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=365 * 100)  # 100년 후 만료 (최대한 길게)
+
+# 기본 루트 /login으로 리다이렉트
+@app.route("/")
+def index():
+    return redirect(url_for("user.login"))
 
 
 jwt = JWTManager(app)
