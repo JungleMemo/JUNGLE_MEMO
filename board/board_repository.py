@@ -26,13 +26,13 @@ class BoardRepository:
         return list(BoardRepository.collection.find().sort("create", DESCENDING))
 
     @staticmethod
-    def find_by_writer(writer):
+    def find_by_writer(writer_email):
         """
         🔍 특정 사용자가 작성한 게시글 조회 (최신순 정렬)
         :param writer: 사용자 ID 또는 이름
         :return: 최신순 정렬된 게시글 리스트
         """
-        return list(BoardRepository.collection.find({"writer": writer}).sort("create", DESCENDING))
+        return list(BoardRepository.collection.find({"writer_email": writer_email}).sort("create", DESCENDING))
 
     @staticmethod
     def find_by_exact_keyword(keyword):
@@ -40,13 +40,13 @@ class BoardRepository:
         return list(BoardRepository.collection.find({"keyword": keyword}))
 
     @staticmethod
-    def create_board(url, writer, title, keyword, summary, like, create):
+    def create_board(url, writer_email, title, keyword, summary, like, create):
         """
         📝 게시글 생성 (DB 저장)
         """
         new_board = {
             "url": url,          
-            "writer": writer,    
+            "writer_email": writer_email,
             "title": title,  
             "keyword": keyword, 
             "summary": summary, 
@@ -57,14 +57,14 @@ class BoardRepository:
         return result.inserted_id
     
     @staticmethod
-    def get_total_likes(writer):
+    def get_total_likes(email):
         """
         🔹 특정 사용자가 받은 좋아요 총합 계산
         :param writer: 사용자 이름
         :return: 총 좋아요 수 (int)
         """
         pipeline = [
-            {"$match": {"writer": writer}},  # ✅ 특정 사용자가 작성한 게시글 필터링
+            {"$match": {"writer_email": email}},  # ✅ 특정 사용자가 작성한 게시글 필터링
             {"$group": {"_id": None, "total_likes": {"$sum": "$like"}}}  # ✅ 좋아요 총합 계산
         ]
         result = list(BoardRepository.collection.aggregate(pipeline))

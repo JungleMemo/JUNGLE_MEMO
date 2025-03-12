@@ -70,7 +70,7 @@ def create_board():
     if not user:
         return redirect(url_for("user.login"))  # 🔹 로그인되지 않으면 로그인 페이지로 이동
 
-    writer = user["username"]
+    writer = email
     csrf_token = generate_csrf()  # ✅ CSRF 토큰 생성
 
     if request.method == "POST":
@@ -115,11 +115,11 @@ def mypage():
         return redirect(url_for("user.login"))
 
     writer = user["username"]
-    total_likes = BoardService.get_total_likes(writer)
-    posts = BoardService.get_boards_by_writer(writer)
+    total_likes = BoardService.get_total_likes(email)
+    posts = BoardService.get_boards_by_writer(email)
     
     # ✅ 히트맵 데이터 추가
-    heatmap_data = BoardService.get_heatmap_data(writer)
+    heatmap_data = BoardService.get_heatmap_data(email)
 
     return render_template(
         "mypage.html", 
