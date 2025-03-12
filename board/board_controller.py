@@ -9,6 +9,7 @@ from flask_wtf.csrf import generate_csrf # ✅ CSRF 토큰 생성 함수 추가
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from board.board_service import BoardService
 from user.user_service import UserService
+from comment.comment_service import CommentService
 
 # 블루프린트 생성
 board_blueprint = Blueprint("board", __name__)
@@ -17,13 +18,26 @@ board_service = BoardService()
 
 @board_blueprint.route("/boards", methods=["GET"])
 def get_boards():
-    """
-    게시글 전체 목록 조회 API (페이징 없이)
-    """
+    """ 게시글 전체 목록 조회 API (페이징 없이) """
     boards = board_service.get_board_list()
-    #  # 🛠 디버깅 출력 (터미널에서 확인 가능)
-    # print("📌 가져온 게시글 목록:", boards)  
     return render_template("board_list.html", boards=boards)
+
+@board_blueprint.route("/board/<post_id>", methods=["GET"])
+@jwt_required(optional=True)  # ✅ 로그인하지 않아도 접근 가능
+def view_board(post_id):
+    """
+    🔹 특정 게시글 상세 조회
+    """
+    board = BoardService.get_board_by_id(post_id)
+    
+    if not board:
+        flash("게시글을 찾을 수 없습니다.", "danger")
+        return redirect(url_for("board.get_boards"))
+
+    comments = CommentService.get_comments_by_board(post_id)
+    current_user = get_jwt_identity()  # ✅ 로그인한 유저만 가져오기 (비로그인 사용자는 None)
+
+    return render_template("contentview.html", board=board, comments=comments, current_user=current_user)
 
 @board_blueprint.route("/create", methods=["GET", "POST"])
 @jwt_required(locations=["cookies"])  # ✅ JWT 인증 필요
@@ -106,3 +120,79 @@ def delete_post(post_id):
         return jsonify({"success": True, "message": "게시글이 삭제되었습니다."}), 200
     else:
         return jsonify({"success": False, "message": "삭제 권한이 없거나 존재하지 않는 게시글입니다."}), 403
+    
+@board_blueprint.route("/add_comment/<board_id>", methods=["POST"])
+@jwt_required(locations=["cookies"])  # ✅ JWT 인증 필요
+def add_comment(board_id):
+    """
+    ✏️ 댓글 작성
+    """
+    email = get_jwt_identity()
+    user = UserService.get_user_by_email(email)
+
+    if not user:
+        return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
+
+    try:
+        data = request.get_json()
+        content = data.get("content")
+
+        if not content:
+            return jsonify({"success": False, "message": "댓글 내용을 입력하세요."}), 400
+
+        print(f"📌 댓글 추가: 작성자={user['username']}, 내용={content}, 게시글ID={board_id}")  # ✅ 디버깅용 로그 추가
+
+        CommentService.add_comment(user["username"], content, board_id)
+        return jsonify({"success": True, "message": "댓글이 등록되었습니다."}), 201
+
+    except Exception as e:
+        print(f"❌ 오류 발생: {str(e)}")  # ✅ 서버에서 발생한 예외 확인
+        return jsonify({"success": False, "message": "서버 오류 발생"}), 500
+
+
+@board_blueprint.route("/delete_comment/<comment_id>", methods=["DELETE"])
+@jwt_required(locations=["cookies"])
+def delete_comment(comment_id):
+    """
+    ❌ 댓글 삭제
+    """
+    email = get_jwt_identity()
+    user = UserService.get_user_by_email(email)
+
+    if not user:
+        return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
+
+    success = CommentService.delete_comment(comment_id)
+    if success:
+        return jsonify({"success": True, "message": "댓글이 삭제되었습니다."}), 200
+    else:
+        return jsonify({"success": False, "message": "삭제할 댓글이 없습니다."}), 403
+    
+@board_blueprint.route("/search", methods=["GET"])
+def search_boards():
+    """
+    🔹 정확한 키워드 검색, 좋아요순 정렬, 최신순 정렬 기능
+    """
+    keyword = request.args.get("keyword", "").strip()
+    sort_by = request.args.get("sort", "like")  # 기본 정렬: 좋아요순
+
+    # 🔍 정확한 키워드 일치 검색 적용
+    boards = BoardService.get_board_list(keyword, sort_by)
+
+    return render_template("search.html", boards=boards)
+
+@board_blueprint.route("/like/<post_id>", methods=["POST"])
+@jwt_required(locations=["cookies"])
+def like_post(post_id):
+    """👍 좋아요 기능 (POST 요청)"""
+    email = get_jwt_identity()
+    user = UserService.get_user_by_email(email)
+
+    if not user:
+        return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
+
+    user_id = user["email"]  # 사용자 식별자로 이메일 사용
+
+    success, message = BoardService.like_post(post_id, user_id)
+
+    return jsonify({"success": success, "message": message})

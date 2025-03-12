@@ -9,39 +9,94 @@
         <p>요약 : {{ board.summary }}</p>
     </div>
     <p id="like-container">
-        <button class="content-likes" onclick="increaseLike({{ board.id }})">
-            좋아요 : <span id="like-count">{{ board.likes }}</span>
+        <button class="content-likes" onclick="increaseLike('{{ board._id }}')">
+            좋아요 : <span id="like-count">{{ board.like }}</span>
         </button>
     </p>
+    
+    
     <div class="user-comment">
         <h3>댓글</h3>
         <ul>
             {% for comment in comments %}
-                <li>
-                    <strong>{{ comment.username }}</strong>
+                <li id="comment-{{ comment._id }}">
+                    <strong>{{ comment.writer }}</strong>
                     <p>{{ comment.content }}</p>
+                    {% if current_user == comment.writer %}
+                        <button onclick="deleteComment('{{ comment._id }}')">삭제</button>
+                    {% endif %}
                 </li>
             {% else %}
                 <p>아직 댓글이 없습니다</p>
             {% endfor %}
         </ul>
     </div>
+
+    <form id="comment-form">
+        <input type="text" id="comment-content" placeholder="댓글을 입력하세요" required>
+        <button type="submit">댓글 작성</button>
+    </form>
 </div>
 
 <script>
     function increaseLike(boardId) {
-        fetch(`/like/${boardId}`, {  // Flask 서버에 요청 보내기
-            method: "POST"
+        fetch(`/like/${boardId}`, {  
+            method: "POST",
+            credentials: "include"
         })
-        .then(response => response.json())  // JSON 응답 받기
+        .then(response => response.json())
         .then(data => {
             if (data.success) {
-                document.getElementById("like-count").innerText = data.likes;  // HTML 업데이트
+                document.getElementById("like-count").innerText = parseInt(document.getElementById("like-count").innerText) + 1;
             } else {
-                alert("좋아요를 업데이트하는 데 실패했습니다.");
+                alert(data.message);
             }
         })
         .catch(error => console.error("Error:", error));
     }
+
+    function deleteComment(commentId) {
+        if (!confirm("정말로 댓글을 삭제하시겠습니까?")) {
+            return;
+        }
+
+        fetch(`/delete_comment/${commentId}`, {
+            method: "DELETE",
+            credentials: "include"
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                document.getElementById(`comment-${commentId}`).remove();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    }
+
+    document.getElementById("comment-form").addEventListener("submit", function(event) {
+        event.preventDefault();
+        const content = document.getElementById("comment-content").value;
+
+        fetch(`/add_comment/{{ board._id }}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "include",
+            body: JSON.stringify({ content: content })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();  // 새 댓글 반영을 위해 새로고침
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    });
 </script>
 {% endblock %}

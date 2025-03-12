@@ -18,6 +18,15 @@ class BoardService:
     KST = pytz.timezone("Asia/Seoul")  # ✅ 한국 표준시 (KST)
 
     @staticmethod
+    def get_board_by_id(post_id):
+        try:
+            post_id = ObjectId(post_id)
+        except:
+            return None
+
+        return BoardRepository.find_by_id(post_id)
+
+    @staticmethod
     def create_board(url, writer, keyword, like=0):
         """
         🔹 글 작성 서비스 (웹페이지에서 정보 추출하여 DB에 저장)
@@ -217,6 +226,33 @@ class BoardService:
         heatmap_data = BoardService.generate_heatmap(start_date, days)
         return BoardService.update_heatmap_data(heatmap_data, db_data)
     
+    @staticmethod
+    def increase_like(post_id, user_email):
+        """
+        ✅ 사용자가 특정 게시글에 좋아요를 누르면 증가
+        """
+        return BoardRepository.increase_like(post_id, user_email)
+
+    @staticmethod
+    def has_user_liked(post_id, user_email):
+        """
+        ✅ 사용자가 좋아요 했는지 확인
+        """
+        return BoardRepository.has_user_liked(post_id, user_email)
+
+    @staticmethod
+    def get_board_by_id(post_id):
+        """✅ 특정 게시글 가져오기"""
+        return BoardRepository.get_board_by_id(post_id)
+
+    @staticmethod
+    def like_post(post_id, user_id):
+        """👍 사용자가 게시글에 좋아요를 누름"""
+        if BoardRepository.has_user_liked(post_id, user_id):
+            return False, "이미 좋아요를 눌렀습니다."
+
+        success = BoardRepository.increase_like(post_id, user_id)
+        return success, "좋아요가 반영되었습니다." if success else "게시글이 존재하지 않습니다."
 
 if __name__ == "__main__":
     print(BoardService.create_board(

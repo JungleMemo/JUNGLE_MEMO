@@ -13,6 +13,12 @@ class BoardRepository:
     """💾 게시글 데이터 관리 (MongoDB)"""
 
     collection = db["boards"]
+    likes_collection = db["likes"]
+
+    @staticmethod
+    def find_by_id(post_id):
+        """✅ 특정 ID의 게시글 조회"""
+        return BoardRepository.collection.find_one({"_id": ObjectId(post_id)})
 
     @staticmethod
     def find_all():
@@ -77,3 +83,36 @@ class BoardRepository:
         except Exception as e:
             print(f"❌ 게시글 삭제 실패: {e}")
             return False  # 🔹 삭제 실패 시 False 반환
+        
+
+    @staticmethod
+    def increase_like(post_id, user_id):
+        """👍 좋아요 추가"""
+        board = BoardRepository.find_by_id(post_id)
+        if not board:
+            return False  # 게시글이 존재하지 않음
+
+        if user_id in board.get("liked_users", []):
+            return False  # 이미 좋아요를 눌렀음
+
+        BoardRepository.collection.update_one(
+            {"_id": ObjectId(post_id)},
+            {"$inc": {"like": 1}, "$push": {"liked_users": user_id}}
+        )
+        return True
+    
+    @staticmethod
+    def has_user_liked(post_id, user_id):
+        """✅ 사용자가 이미 좋아요를 눌렀는지 확인"""
+        board = BoardRepository.find_by_id(post_id)
+        if not board:
+            return False
+        
+        liked_users = board.get("liked_users", [])
+        return user_id in liked_users
+
+    
+    @staticmethod
+    def get_board_by_id(post_id):
+        """✅ 특정 ID의 게시글 가져오기"""
+        return BoardRepository.collection.find_one({"_id": ObjectId(post_id)})

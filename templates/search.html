@@ -20,7 +20,9 @@
     <div class="post-container">
         {% for board in boards %}
             <div class="post">
-                <h3>{{ board.title }}</h3>
+                <h3>
+                    <a href="{{ url_for('board.view_board', post_id=board._id|string) }}">{{ board.title }}</a>
+                </h3>
                 <p>{{ board.summary }}</p>
                 <small>작성자: {{ board.writer }} | 좋아요: {{ board.like }} | 날짜: {{ board.create }}</small>
             </div>
