@@ -144,7 +144,7 @@ def delete_post(post_id):
         return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
 
     writer = user["username"]
-    success = BoardService.delete_post(post_id, writer)
+    success = BoardService.delete_post(post_id, email)
 
     return redirect(url_for("board.mypage"))  # ✅ 삭제 후 게시글 목록으로 리디렉트
 

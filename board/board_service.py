@@ -129,7 +129,7 @@ class BoardService:
         return BoardRepository.find_by_writer(writer_email)
     
     @staticmethod
-    def delete_post(post_id, writer):
+    def delete_post(post_id, email):
         """
         🗑 게시글 삭제 (DELETE 요청 처리)
         :param post_id: 삭제할 게시글의 ID
@@ -141,7 +141,7 @@ class BoardService:
         if not post:
             return False  # 🔹 게시글이 존재하지 않음
         
-        if post["writer"] != writer:
+        if post["writer_email"] != email:
             return False  # 🔹 작성자 본인이 아님 (삭제 권한 없음)
 
         return BoardRepository.delete_by_id(post_id)  # ✅ 삭제 실행
