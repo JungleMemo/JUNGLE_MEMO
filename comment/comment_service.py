@@ -1,10 +1,7 @@
 import sys
 import os
-
-# 현재 파일이 속한 디렉토리의 상위 디렉토리를 모듈 검색 경로에 추가
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from datetime import datetime
+from bson.objectid import ObjectId  # ✅ ObjectId 임포트 추가
 from comment.comment_repository import CommentRepository
 
 class CommentService:
@@ -20,7 +17,19 @@ class CommentService:
         """✏️ 새로운 댓글 추가"""
         create_time = datetime.now()  # ✅ UTC 시간 기준 저장
         print(f"📌 댓글 저장: 작성자={writer_name}, 내용={content}, 게시글ID={board_id}")  # ✅ 디버깅용 로그 추가
-        return CommentRepository.create_comment(writer_name, writer_email, content, create_time, board_id)
+
+        # ✅ ObjectId 변환 (보드 ID가 문자열로 전달될 가능성 대비)
+        if not isinstance(board_id, ObjectId):
+            try:
+                board_id = ObjectId(board_id)
+            except:
+                print("❌ 유효하지 않은 ObjectId 변환 실패")
+                return False
+
+        # 댓글 저장
+        CommentRepository.create_comment(writer_name, writer_email, content, create_time, board_id)
+
+        return True
 
     @staticmethod
     def delete_comment(comment_id):
@@ -35,6 +44,3 @@ class CommentService:
     def get_comment_by_id(comment_id):
         return CommentRepository.find_by_id(comment_id)
 
-
-if __name__ == "__main__":
-    CommentService.add_comment("123", "hi", "67d0604e0e13abbe0ff85bc4")

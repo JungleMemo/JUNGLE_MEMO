@@ -10,6 +10,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_req
 from board.board_service import BoardService
 from user.user_service import UserService
 from comment.comment_service import CommentService
+from bson.objectid import ObjectId
 
 # 블루프린트 생성
 board_blueprint = Blueprint("board", __name__)
@@ -152,24 +153,43 @@ def delete_post(post_id):
 @board_blueprint.route("/add_comment/<board_id>", methods=["POST"])
 @jwt_required(locations=["cookies"])
 def add_comment(board_id):
-    email = get_jwt_identity()  # "qwer@qwer.com"
+    """✏️ 댓글 추가 (SSR 방식)"""
+    email = get_jwt_identity()
     user = UserService.get_user_by_email(email)
+
     if not user:
-        return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
+        flash("❌ 로그인이 필요합니다.", "danger")
+        return redirect(url_for("user.login"))
 
-    data = request.get_json()
-    content = data.get("content")
+    # ✅ content를 None으로 초기화
+    content = None
+    try:
+        content = request.form.get("content")  # ✅ 값을 가져오기
+    except Exception as e:
+        print(f"🚨 [DEBUG] request.form.get('content') 오류: {e}")
+    
     if not content:
-            return jsonify({"success": False, "message": "댓글 내용을 입력하세요."}), 400
+        flash("❌ 댓글 내용을 입력하세요.", "danger")
+        return redirect(url_for("board.view_board", post_id=str(board_id)))
 
-        # 닉네임 + 이메일 둘 다 준비
-    writer_name = user["username"]     
-    writer_email = user["email"]       
+    # ✅ ObjectId 변환
+    try:
+        board_id = ObjectId(board_id)
+    except:
+        flash("❌ 유효하지 않은 게시글 ID입니다.", "danger")
+        return redirect(url_for("board.get_boards"))
 
-    # 댓글 db에 저장
+    # 닉네임 + 이메일 둘 다 준비
+    writer_name = user["username"]
+    writer_email = user["email"]
+
+    # 댓글 DB에 저장
     CommentService.add_comment(writer_name, writer_email, content, board_id)
 
-    return jsonify({"success": True, "message": "댓글이 등록되었습니다."}), 201
+    flash("✅ 댓글이 등록되었습니다!", "success")
+
+    # ✅ SSR 방식: 원래 게시글 페이지로 리다이렉트
+    return redirect(url_for("board.view_board", post_id=str(board_id)))
 
 @board_blueprint.route("/delete_comment/<comment_id>", methods=["DELETE"])
 @jwt_required(locations=["cookies"])

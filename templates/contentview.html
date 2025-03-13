@@ -7,7 +7,9 @@
     <!-- 게시글 내용 -->
     <div class="card shadow p-4">
         <div class="card-body">
-            <h2 class="card-title">{{ board.title }}</h2>
+            <h2 class="card-title" >
+                <a href="{{board.url}}">{{board.title }}</a> 
+            </h2>
             <p class="card-text"><strong>요약 :</strong> {{ board.summary }}</p>
             
             <!-- 좋아요 버튼 -->
@@ -42,8 +44,8 @@
     <!-- 댓글 작성 폼 -->
     <div class="card p-3 mt-3 shadow-sm">
         <h5 class="mb-3">댓글 작성</h5>
-        <form id="comment-form" class="d-flex">
-            <input type="text" id="comment-content" class="form-control me-2" placeholder="댓글을 입력하세요" required>
+        <form action="/add_comment/{{board._id}}" method="POST">
+            <input type="text" name="content" id="comment-content" class="form-control me-2" placeholder="댓글을 입력하세요" required>
             <button type="submit" class="btn btn-dark btn">작성</button>
         </form>
     </div>
@@ -88,28 +90,7 @@
         .catch(error => console.error("Error:", error));
     }
 
-    document.getElementById("comment-form").addEventListener("submit", function(event) {
-        event.preventDefault();
-        const content = document.getElementById("comment-content").value;
-
-        fetch(`/add_comment/{{ board._id }}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            credentials: "include",
-            body: JSON.stringify({ content: content })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();  // 새 댓글 반영을 위해 새로고침
-            } else {
-                alert(data.message);
-            }
-        })
-        .catch(error => console.error("Error:", error));
-    });
+   
 </script>
 {% endblock %}
 

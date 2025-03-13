@@ -7,12 +7,12 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import re
 import requests
 from bs4 import BeautifulSoup
-from datetime import datetime, timedelta, date as dt_date
+from datetime import datetime, timedelta, date
 from board.board_repository import BoardRepository
 from urllib.parse import urlparse
 import pytz 
 from bson.objectid import ObjectId
-
+from comment.comment_repository import CommentRepository
 
 class BoardService:
 
@@ -39,7 +39,7 @@ class BoardService:
         """
         title = BoardService.extract_title(url)
         summary = BoardService.extract_summary(url, keyword)
-        create_time = datetime.now(BoardService.KST)  # ✅ 한국 시간(KST) 기준으로 저장
+        create_time = datetime.now()  # ✅ 현재 UTC 시간 기록
 
         print(f"📌 Creating board with data: {url}, {writer}, {title}, {keyword}, {summary}, {like}, {create_time}")
 
@@ -63,6 +63,13 @@ class BoardService:
         sort_order = -1  # 내림차순 정렬
 
         return sorted(boards, key=lambda x: x.get(sort_field, 0), reverse=True)
+
+    @staticmethod
+    def get_board_with_comments(board_id):
+        """📌 게시글과 댓글을 함께 가져오기 (SSR 방식)"""
+        board = BoardRepository.get_board_by_id(board_id)  # ✅ 게시글 조회
+        comments = CommentRepository.get_comments_by_board_id(board_id)  # ✅ 해당 게시글의 댓글 조회
+        return board, comments
 
     @staticmethod
     def extract_content_text(url):
@@ -207,34 +214,28 @@ class BoardService:
     def get_heatmap_data(email):
         """
         🔥 특정 사용자의 게시글 작성 데이터를 반영한 히트맵 생성
+        :param writer: 작성자 ID 또는 이름
+        :return: 날짜별 글 작성 여부 (딕셔너리 형태)
         """
-        posts = BoardRepository.find_by_writer(email)
+        posts = BoardRepository.find_by_writer(email)  # ✅ 사용자의 게시글 가져오기
         db_data = []
 
         for post in posts:
             if isinstance(post["create"], datetime):
                 # ✅ UTC → KST 변환 후 날짜 포맷 변경
-                date_kst = post["create"].astimezone(BoardService.KST).strftime("%Y-%m-%d")
+                date_kst = post["create"].replace(tzinfo=pytz.utc).astimezone(BoardService.KST).strftime("%Y-%m-%d")
             else:
                 date_kst = post["create"]  # ✅ 문자열로 저장된 경우 그대로 사용
             db_data.append(date_kst)
 
         # ✅ 히트맵 기간 (2025년 3월 10일 ~ 2025년 7월 31일)
-        start_date = dt_date(2025, 3, 10)  # ✅ dt_date 사용
-        end_date = dt_date(2025, 7, 31)  # ✅ dt_date 사용
+        start_date = date(2025, 3, 10)
+        end_date = date(2025, 7, 31)
 
         # ✅ 기본 히트맵 데이터 생성
-        heatmap_data = {
-            (start_date + timedelta(days=i)).strftime("%Y-%m-%d"): 0
-            for i in range((end_date - start_date).days + 1)
-        }
+        heatmap_data = BoardService.generate_heatmap(start_date, end_date)
 
-        # ✅ 히트맵 데이터 업데이트
-        for date in db_data:
-            if date in heatmap_data:
-                heatmap_data[date] = 1  # ✅ 해당 날짜에 글이 있음을 표시
-
-        return heatmap_data
+        return BoardService.update_heatmap_data(heatmap_data, db_data)
     
     @staticmethod
     def increase_like(post_id, user_email):
