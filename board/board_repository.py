@@ -1,3 +1,4 @@
+
 import sys
 import os 
 from datetime import datetime
@@ -116,3 +117,4 @@ class BoardRepository:
     def get_board_by_id(post_id):
         """✅ 특정 ID의 게시글 가져오기"""
         return BoardRepository.collection.find_one({"_id": ObjectId(post_id)})
+

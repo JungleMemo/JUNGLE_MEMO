@@ -12,7 +12,7 @@ from board.board_repository import BoardRepository
 from urllib.parse import urlparse
 import pytz 
 from bson.objectid import ObjectId
-
+from comment.comment_repository import CommentRepository
 
 class BoardService:
 
@@ -63,6 +63,13 @@ class BoardService:
         sort_order = -1  # 내림차순 정렬
 
         return sorted(boards, key=lambda x: x.get(sort_field, 0), reverse=True)
+
+    @staticmethod
+    def get_board_with_comments(board_id):
+        """📌 게시글과 댓글을 함께 가져오기 (SSR 방식)"""
+        board = BoardRepository.get_board_by_id(board_id)  # ✅ 게시글 조회
+        comments = CommentRepository.get_comments_by_board_id(board_id)  # ✅ 해당 게시글의 댓글 조회
+        return board, comments
 
     @staticmethod
     def extract_content_text(url):
