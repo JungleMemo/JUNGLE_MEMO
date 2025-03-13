@@ -7,7 +7,9 @@
     <!-- 게시글 내용 -->
     <div class="card shadow p-4">
         <div class="card-body">
-            <h2 class="card-title">{{ board.title }}</h2>
+            <h2 class="card-title" >
+                <a href="{{board.url}}">{{board.title }}</a> 
+            </h2>
             <p class="card-text"><strong>요약 :</strong> {{ board.summary }}</p>
             
             <!-- 좋아요 버튼 -->
